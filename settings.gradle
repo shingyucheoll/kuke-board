@@ -1,0 +1,14 @@
+// 프로젝트의 루트 이름 정의
+rootProject.name = 'kuke-board'
+
+// 멀티 모듈 프로젝트에 포함될 하위 모듈 등록
+// include를 통해 등록된 모듈은 Gradle 빌드 시 독립적인 프로젝트로 인식됨
+include 'common' // 공통 유틸리티 및 공유 코드 모듈
+include 'service' // 서비스들의 부모 모듈
+include 'service:article' // 게시글 작성/수정 서비스 (포트: 9000)
+include 'service:comment' // 댓글 관리 서비스 (포트: 9001)
+include 'service:view' // 조회수 추적 서비스 (포트: 9003)
+include 'service:like' // 좋아요 기능 서비스 (포트: 9002)
+include 'service:hot-article' // 인기 게시글 집계 서비스 (포트: 9004)
+include 'service:article-read' // 게시글 조회 전용 서비스 (포트: 9005) - CQRS 패턴 적용
+
