@@ -11,4 +11,4 @@ include 'service:view' // 조회수 추적 서비스 (포트: 9003)
 include 'service:like' // 좋아요 기능 서비스 (포트: 9002)
 include 'service:hot-article' // 인기 게시글 집계 서비스 (포트: 9004)
 include 'service:article-read' // 게시글 조회 전용 서비스 (포트: 9005) - CQRS 패턴 적용
-
+include 'common:snowflake'
