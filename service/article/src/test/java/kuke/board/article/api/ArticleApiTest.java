@@ -1,9 +1,12 @@
 package kuke.board.article.api;
 
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.web.client.RestClient;
 
+import kuke.board.article.service.response.ArticlePageResponse;
 import kuke.board.article.service.response.ArticleResponse;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -62,6 +65,63 @@ public class ArticleApiTest {
             .uri("/v1/articles/{articleId}", 238153465126817792L)
             .retrieve()
             .toBodilessEntity();
+    }
+
+    @Test
+    void readAllTest() {
+        ArticlePageResponse response = restClient.get()
+            .uri("/v1/articles?boardId=1&page=30&pageSize=1")
+            .retrieve()
+            .body(ArticlePageResponse.class);
+
+        System.out.println("response = " + response.getArticleCount());
+
+        for (ArticleResponse article : response.getArticles()) {
+            System.out.println("article = " + article.getArticleId());
+        }
+    }
+
+    /**
+     * ParameterizedTypeReference 사용 이유:
+     * Java의 Type Erasure로 인해 제네릭 타입 정보가 런타임에 사라지는 문제를 해결
+     * ❌ 불가능:
+     *   - List<ArticleResponse>.class  (컴파일 에러)
+     *   - .body(List.class)  (List<LinkedHashMap>으로 역직렬화됨)
+     * ✅ 해결:
+     *   - new ParameterizedTypeReference<List<ArticleResponse>>(){}
+     *   - 익명 클래스 생성 → 슈퍼클래스의 제네릭 타입 정보가 바이트코드에 보존됨
+     *   - 리플렉션으로 타입 정보 추출 → Jackson에게 정확한 타입 전달
+     * 사용 예:
+     *   - List<T>, Map<K,V>, Set<T> 등 제네릭 컬렉션
+     *   - 구체적 클래스(ArticlePageResponse 등)는 .class 사용 가능
+     */
+    @Test
+    void readAllInfiniteScrollTest() {
+        // ParameterizedTypeReference: 제네릭 타입 정보 보존
+        List<ArticleResponse> articles1 = restClient.get()
+            .uri("/v1/articles/infinite-scroll?boardId=1&page=30&pageSize=5")
+            .retrieve()
+            .body(new ParameterizedTypeReference<List<ArticleResponse>>() {
+                // 익명 클래스: 슈퍼클래스 제네릭 정보가 바이트코드에 남음
+            });
+        System.out.println("firstPage");
+        for (ArticleResponse articleResponse : articles1) {
+            System.out.println("article = " + articleResponse.getArticleId());
+        }
+
+        Long lastArticleId = articles1.getLast().getArticleId();
+
+        List<ArticleResponse> articles2 = restClient.get()
+            .uri("/v1/articles/infinite-scroll?boardId=1&page=30&pageSize=5&lastArticleId=%s".formatted(lastArticleId))
+            .retrieve()
+            .body(new ParameterizedTypeReference<List<ArticleResponse>>() {
+            });
+        System.out.println("secondPage");
+
+        for (ArticleResponse articleResponse : articles2) {
+            System.out.println("article = " + articleResponse.getArticleId());
+        }
+
     }
 
     @Getter
