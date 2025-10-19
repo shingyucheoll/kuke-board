@@ -1,3 +1,16 @@
-dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-webmvc'
+/*
+ * Article-Read Service - 게시글 조회 전용 서비스
+ *
+ * 포트: 9005
+ * 역할: 게시글 읽기 전용 (Query 담당, CQRS 패턴)
+ * 특징: 읽기 성능 최적화, 별도 Read DB 사용 가능
+ */
+
+plugins {
+    id 'service-conventions'  // 마이크로서비스 공통 설정 적용
 }
+
+// article-read 서비스만의 특별한 의존성이 필요한 경우 여기에 추가
+// dependencies {
+//     implementation 'redis-cache-library'  // 읽기 성능 향상을 위한 캐시
+// }

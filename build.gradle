@@ -1,50 +1,23 @@
-// 프로젝트에 적용할 플러그인 정의
-plugins {
-    id 'java'                                               // Java 컴파일 및 빌드 기능 제공
-    id 'org.springframework.boot' version '4.0.0-M3'        // Spring Boot 실행 가능한 JAR 생성
-    id 'io.spring.dependency-management' version '1.1.7'    // Spring 의존성 버전 자동 관리
-}
+/*
+ * Kuke Board - 멀티 모듈 MSA 프로젝트 루트 빌드 설정
+ *
+ * 프로젝트 구조:
+ * - buildSrc: Convention Plugin 정의 (library-conventions, service-conventions)
+ * - common: 공통 라이브러리 모듈 그룹
+ * - service: 마이크로서비스 모듈 그룹
+ *
+ * 빌드 전략:
+ * - Convention Plugin 패턴 사용으로 중복 설정 제거
+ * - 각 모듈 타입별로 표준화된 빌드 설정 적용
+ */
 
-// 프로젝트 그룹 및 버전 정보
+// 프로젝트 메타데이터
 group = 'kuke'
 version = '1'
 
-// 루트 프로젝트와 모든 하위 모듈에 공통으로 적용되는 설정
+// 모든 프로젝트(루트 포함)에 공통으로 적용되는 설정
 allprojects {
-
-    // 의존성을 다운로드할 저장소 (Maven Central)
     repositories {
-        mavenCentral()
-    }
-
-    // 모든 모듈에 플러그인 적용
-    apply plugin: 'java'                            // Java 컴파일, test 등의 기본 태스크 제공
-    apply plugin: 'org.springframework.boot'        // bootRun, bootJar 등 Spring Boot 관련 태스크 제공
-    apply plugin: 'io.spring.dependency-management' // BOM 기반 의존성 버전 통합 관리
-
-    // Java 버전 설정
-    java {
-        sourceCompatibility = JavaVersion.VERSION_25 // 소스 코드 호환성 (컴파일 시 사용하는 Java 버전)
-        targetCompatibility = JavaVersion.VERSION_25 // 컴파일된 클래스 파일의 호환성 (실행 시 필요한 최소 Java 버전)
-    }
-
-    // 모든 모듈에 공통으로 사용되는 의존성
-    dependencies {
-
-        // Lombok
-        compileOnly 'org.projectlombok:lombok'              // 컴파일 시에만 필요
-        annotationProcessor 'org.projectlombok:lombok'      // 컴파일 시점에 어노테이션 처리
-        testCompileOnly 'org.projectlombok:lombok'          // 테스트 컴파일 시에만 필요
-        testAnnotationProcessor 'org.projectlombok:lombok'  // 테스트 컴파일 시점에 어노테이션 처리
-
-        // 테스트 관련 의존성
-        testImplementation 'org.springframework.boot:spring-boot-starter-test'  // Spring Boot 테스트 도구 (JUnit, Mockito)
-        testRuntimeOnly 'org.junit.platform:junit-platform-launcher'            // JUnit 플랫폼 실행기
-    }
-
-    // 테스트 설정: JUnit 플랫폼 사용
-    tasks.named('test') {
-        useJUnitPlatform() // JUnit 5를 사용하여 테스트 실행
+        mavenCentral()  // Maven Central Repository에서 의존성 다운로드
     }
 }
-

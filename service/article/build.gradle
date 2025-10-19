@@ -1,3 +1,15 @@
+/*
+ * Article Service - 게시글 작성/수정 서비스
+ *
+ * 포트: 9000
+ * 역할: 게시글 생성, 수정, 삭제 (Command 담당, CQRS 패턴)
+ */
+
+plugins {
+    id 'service-conventions'  // 마이크로서비스 공통 설정 적용
+}
+
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-webmvc'
+    // SnowFlake 라이브러리: 게시글 고유 ID 생성
+    implementation project(':common:snowflake')
 }

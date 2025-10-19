@@ -1,0 +1,14 @@
+/*
+ * Common - 공통 모듈 그룹 부모 빌드 설정
+ *
+ * 역할:
+ * - common 하위의 라이브러리 모듈들을 그룹화하는 논리적 부모 모듈
+ * - 소스 코드 없음, 단순 디렉토리 구조 관리 목적
+ *
+ * 하위 모듈:
+ * - common:snowflake - 분산 환경 고유 ID 생성 라이브러리
+ * - (향후 추가) common:utils, common:security 등
+ */
+
+// 부모 모듈은 소스 코드가 없으므로 아무 설정도 필요 없음
+// buildSrc의 Convention Plugin만 하위 모듈에 적용됨

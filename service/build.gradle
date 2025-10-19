@@ -1,0 +1,18 @@
+/*
+ * Service - 마이크로서비스 그룹 부모 빌드 설정
+ *
+ * 역할:
+ * - service 하위의 마이크로서비스들을 그룹화하는 논리적 부모 모듈
+ * - 소스 코드 없음, 단순 디렉토리 구조 관리 목적
+ *
+ * 하위 모듈:
+ * - service:article - 게시글 작성/수정 서비스 (포트: 9000)
+ * - service:article-read - 게시글 조회 전용 서비스 (포트: 9005, CQRS 패턴)
+ * - service:comment - 댓글 관리 서비스 (포트: 9001)
+ * - service:view - 조회수 추적 서비스 (포트: 9003)
+ * - service:like - 좋아요 기능 서비스 (포트: 9002)
+ * - service:hot-article - 인기 게시글 집계 서비스 (포트: 9004)
+ */
+
+// 부모 모듈은 소스 코드가 없으므로 아무 설정도 필요 없음
+// buildSrc의 Convention Plugin만 하위 모듈에 적용됨

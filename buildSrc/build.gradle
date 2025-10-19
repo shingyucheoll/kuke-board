@@ -1,0 +1,28 @@
+/*
+ * buildSrc는 Gradle Convention Plugin을 정의하기 위한 특별한 프로젝트
+ *
+ * 역할:
+ * - 프로젝트 전체에서 재사용 가능한 빌드 로직(Convention)을 정의
+ * - library-conventions, service-conventions 같은 커스텀 플러그인 제공
+ * - Gradle이 자동으로 인식하고 빌드 시 먼저 컴파일
+ */
+
+plugins {
+    // Groovy DSL로 작성된 Gradle Plugin 개발을 지원하는 플러그인
+    id 'groovy-gradle-plugin'
+}
+
+repositories {
+    gradlePluginPortal()  // Gradle 플러그인 저장소
+    mavenCentral()        // 일반 라이브러리 저장소
+}
+
+dependencies {
+    // Spring Boot Gradle Plugin을 buildSrc에서 사용
+    // Convention에서 'org.springframework.boot' 플러그인 적용 시 필요
+    implementation 'org.springframework.boot:spring-boot-gradle-plugin:4.0.0-M3'
+
+    // Spring Dependency Management Plugin
+    // Spring BOM을 통한 의존성 버전 관리
+    implementation 'io.spring.gradle:dependency-management-plugin:1.1.7'
+}
