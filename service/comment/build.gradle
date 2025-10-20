@@ -10,6 +10,6 @@ plugins {
 }
 
 // comment 서비스만의 특별한 의존성이 필요한 경우 여기에 추가
-// dependencies {
-//     implementation project(':common:snowflake')  // 댓글 ID 생성 필요시
-// }
+ dependencies {
+     implementation project(':common:snowflake')  // 댓글 ID 생성 필요시
+ }
