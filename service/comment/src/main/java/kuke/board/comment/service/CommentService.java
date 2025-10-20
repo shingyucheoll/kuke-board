@@ -59,20 +59,35 @@ public class CommentService {
         commentRepository.findById(commentId)
             .filter(not(Comment::getDeleted))
             .ifPresent(comment -> {
+                // 하위 댓글이 있을 경우
                 if (hasChildren(comment)) {
+                    // 논리 삭제만 진행
                     comment.delete();
                 } else {
+                    // 하위 댓글이 없을 경우 물리적 삭제
                     delete(comment);
                 }
             });
     }
 
     private boolean hasChildren(Comment comment) {
-        return false;
+        // parentCommentId 를 2개만 조회하고 만약 2개가 조회됐다면 자식을 가진 댓글이므로 true 를 반환합니다.
+        return commentRepository.countBy(comment.getArticleId(), comment.getCommentId(), 2L) == 2;
     }
 
     private void delete(Comment comment) {
-
+        commentRepository.delete(comment);
+        // 해당 댓글이 루트 댓글이 아닌 경우 ( commentId 와 parentCommentId 가 다를 경우 )
+        if (!comment.isRoot()) {
+            // parentCommentId 로 조회
+            commentRepository.findById(comment.getParentCommentId())
+                // 이미 삭제된 댓글이라면 ( 기존 자식 댓글이 존재해서 삭제되지 않았던 상태인 경우 )
+                .filter(Comment::getDeleted)
+                // 자식 댓글이 없는지 확인 후 ( 2개 미만 조회 )
+                .filter(not(this::hasChildren))
+                // 해당 Comment 를 삭제합니다.
+                .ifPresent(this::delete);
+        }
     }
 
 }
