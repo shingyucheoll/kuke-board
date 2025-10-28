@@ -1,5 +1,7 @@
 package kuke.board.comment.repository;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -13,8 +15,8 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
 
     @Query(
         value = "select count(*) from (" +
-            "select comment_id from commnet " +
-            "where article_id = :articleId and parent_comment_id = :parentCommnetId " +
+            "select comment_id from comment " +
+            "where article_id = :articleId and parent_comment_id = :parentCommentId " +
             "limit :limit" +
             ") t",
         nativeQuery = true
@@ -25,4 +27,57 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
         @Param("limit") Long limit
     );
 
+    @Query(
+        value = "select comment.comment_id, comment.content, comment.parent_comment_id, "
+              + "comment.article_id, comment.writer_id, comment.deleted, comment.created_at "
+              + "from ("
+              + "    select comment_id from comment where article_id = :articleId "
+              + "    order by parent_comment_id asc, comment_id asc "
+              + "    limit :limit offset :offset "
+              + ") t left join comment on t.comment_id = comment.comment_id",
+        nativeQuery = true
+    )
+    List<Comment> findAll(
+        @Param("articleId") Long articleId,
+        @Param("offset") Long offset,
+        @Param("limit") Long limit);
+
+    @Query(
+        value = "select count(*) from ("
+              + "    select comment_id from comment where article_id = :articleId limit :limit"
+              + ") t",
+            nativeQuery = true
+    )
+    Long count(@Param("articleId") Long articleId, @Param("limit") Long limit);
+
+    @Query(
+        value = "select comment.comment_id, comment.content, comment.parent_comment_id, "
+            + "comment.article_id, comment.writer_id, comment.deleted, comment.created_at "
+            + "from comment "
+            + "where article_id = :articleId "
+            + "order by parent_comment_id asc, comment_id asc "
+            + "limit :limit",
+        nativeQuery = true
+    )
+    List<Comment> findAllInfiniteScroll(
+        @Param("articleId") Long articleId,
+        @Param("limit") Long limit);
+
+    @Query(
+        value = "select comment.comment_id, comment.content, comment.parent_comment_id, "
+            + "comment.article_id, comment.writer_id, comment.deleted, comment.created_at "
+            + "from comment "
+            + "where article_id = :articleId and ("
+            + "    parent_comment_id > :lastParentCommentId or"
+            + "    (parent_comment_id = :lastParentCommentId and comment_id > :lastCommentId)"
+            + ")"
+            + "order by parent_comment_id asc, comment_id asc "
+            + "limit :limit",
+        nativeQuery = true
+    )
+    List<Comment> findAllInfiniteScroll(
+        @Param("articleId") Long articleId,
+        @Param("lastParentCommentId") Long lastParentCommentId,
+        @Param("lastCommentId") Long lastCommentId,
+        @Param("limit") Long limit);
 }
