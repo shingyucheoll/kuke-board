@@ -63,7 +63,7 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
         @Param("articleId") Long articleId,
         @Param("limit") Long limit);
 
-    @Query(
+    @Query( 
         value = "select comment.comment_id, comment.content, comment.parent_comment_id, "
             + "comment.article_id, comment.writer_id, comment.deleted, comment.created_at "
             + "from comment "
