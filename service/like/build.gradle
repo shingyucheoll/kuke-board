@@ -1,6 +1,5 @@
 /*
  * Like Service - 좋아요 기능 서비스
- *
  * 포트: 9002
  * 역할: 게시글 좋아요/취소 처리 및 집계
  */
@@ -10,6 +9,6 @@ plugins {
 }
 
 // like 서비스만의 특별한 의존성이 필요한 경우 여기에 추가
-// dependencies {
-//     implementation 'spring-data-redis'  // 좋아요 카운트 캐싱
-// }
+dependencies {
+    implementation project(':common:snowflake')
+}
