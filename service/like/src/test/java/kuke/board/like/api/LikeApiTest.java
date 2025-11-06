@@ -1,20 +1,23 @@
 package kuke.board.like.api;
 
+import kuke.board.like.service.response.ArticleLikeResponse;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.client.RestClient;
 
-import kuke.board.like.service.response.ArticleLikeResponse;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class LikeApiTest {
     RestClient restClient = RestClient.create("http://localhost:9002");
 
     @Test
-    void likeAndUnlikeTest(){
+    void likeAndUnlikeTest() {
         Long articleId = 9999L;
 
-        like(articleId, 1L);
-        like(articleId, 2L);
-        like(articleId, 3L);
+        like(articleId, 1L, "pessimistic-lock-1");
+        like(articleId, 2L, "pessimistic-lock-1");
+        like(articleId, 3L, "pessimistic-lock-1");
 
         ArticleLikeResponse response1 = read(articleId, 1L);
         ArticleLikeResponse response2 = read(articleId, 2L);
@@ -28,25 +31,69 @@ public class LikeApiTest {
         unlike(articleId, 3L);
     }
 
-    void like(Long articleId, Long userId){
+    void like(Long articleId, Long userId, String lockType) {
         restClient.post()
-            .uri("v1/article-likes/articles/{articleId}/users/{userId}", articleId, userId)
+            .uri("/v1/article-likes/articles/{articleId}/users/{userId}/" + lockType, articleId, userId)
             .retrieve()
             .toBodilessEntity();
     }
 
-    void unlike(Long articleId, Long userId){
+    void unlike(Long articleId, Long userId) {
         restClient.delete()
-            .uri("v1/article-likes/articles/{articleId}/users/{userId}", articleId, userId)
+            .uri("/v1/article-likes/articles/{articleId}/users/{userId}", articleId, userId)
             .retrieve()
             .toBodilessEntity();
     }
 
-    ArticleLikeResponse read(Long articleId, Long userId){
+    ArticleLikeResponse read(Long articleId, Long userId) {
         return restClient.get()
-            .uri("v1/article-likes/articles/{articleId}/users/{userId}", articleId, userId)
+            .uri("/v1/article-likes/articles/{articleId}/users/{userId}", articleId, userId)
             .retrieve()
             .body(ArticleLikeResponse.class);
     }
 
+
+    @Test
+    void likePerformanceTest() throws InterruptedException {
+        ExecutorService executorService = Executors.newFixedThreadPool(100);
+        likePerformanceTest(executorService, 555L, "pessimistic-lock-1");
+        likePerformanceTest(executorService, 666L, "pessimistic-lock-2");
+        likePerformanceTest(executorService, 777L, "optimistic-lock");
+    }
+
+    void likePerformanceTest(ExecutorService executorService, Long articleId, String lockType) throws InterruptedException {
+
+        // 최초 1회만 먼저 실행하고 완료 대기
+        like(articleId, 1L, lockType);
+        Thread.sleep(100);  // 최초 INSERT 완료 보장
+
+        System.out.println("likePerformanceTest 실행 " +  lockType);
+        CountDownLatch latch = new CountDownLatch(3000);
+        System.out.println(lockType + " start");
+
+        long start = System.nanoTime();
+        for(int i=0; i < 3000; i++) {
+            long userId = i + 2;
+            executorService.submit(() -> {
+                System.out.println(Thread.currentThread().getName() + " start");
+                like(articleId, userId, lockType);
+                latch.countDown();
+                System.out.println(Thread.currentThread().getName() + " end");
+            });
+        }
+
+        latch.await();
+
+        long end = System.nanoTime();
+
+        System.out.println("lockType = " + lockType + ", time = " + (end - start) / 1000000 + "ms");
+        System.out.println(lockType + " end");
+
+        Long count = restClient.get()
+            .uri("/v1/article-likes/articles/{articleId}/count", articleId)
+            .retrieve()
+            .body(Long.class);
+
+        System.out.println("count = " + count);
+    }
 }
