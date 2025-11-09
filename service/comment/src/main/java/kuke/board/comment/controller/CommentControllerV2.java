@@ -37,7 +37,6 @@ public class CommentControllerV2 {
         commentService.delete(commentId);
     }
 
-
     @GetMapping("/v2/comments")
     public CommentPageResponse readAll(
         @RequestParam("articleId") Long articleId,
@@ -56,11 +55,11 @@ public class CommentControllerV2 {
         return commentService.readAllInfiniteScroll(articleId, lastPath, pageSize);
     }
 
-    // @GetMapping("/v2/comments/articles/{articleId}/count")
-    // public Long count(
-    //     @PathVariable("articleId") Long articleId
-    // ) {
-    //     return commentService.count(articleId);
-    // }
+    @GetMapping("/v2/comments/articles/{articleId}/count")
+    public Long count(
+        @PathVariable("articleId") Long articleId
+    ) {
+        return commentService.count(articleId);
+    }
 
 }

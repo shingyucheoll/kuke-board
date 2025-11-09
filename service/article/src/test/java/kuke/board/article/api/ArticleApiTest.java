@@ -121,6 +121,33 @@ public class ArticleApiTest {
         for (ArticleResponse articleResponse : articles2) {
             System.out.println("article = " + articleResponse.getArticleId());
         }
+    }
+
+    @Test
+    void countTest() {
+        ArticleResponse response = create(new ArticleCreateRequest("hi", "Test content", 1L, 2L));
+
+        Long count1 = restClient.get()
+            .uri("/v1/articles/boards/{boardId}/count", 2L)
+            .retrieve()
+            .body(Long.class);
+
+        System.out.println("count1 = " + count1);
+
+        restClient.delete()
+            .uri("/v1/articles/{articleId}", response.getArticleId())
+            .retrieve()
+            .toBodilessEntity();
+
+        Long count2 = restClient.get()
+            .uri("/v1/articles/boards/{boardId}/count", 2L)
+            .retrieve()
+            .body(Long.class);
+
+        System.out.println("count2 = " + count2);
+
+
+
 
     }
 
